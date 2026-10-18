@@ -2591,7 +2591,7 @@ HELP_SECTIONS = [
     ("🎭 Pour rire", ["goulag", "coup_de_ceinture", "tribunal", "clash", "exorcisme", "adoption"]),
     ("🎲 Jeux", ["ki-moun", "imposteur", "sondage-chaos", "annuler"]),
     ("🎶 Musique", ["shatta"]),
-    ("📡 Utile", ["ping"]),
+    ("📡 Utile", ["ping", "lien"]),
 ]
 HELP_STAFF = ["style", "reset", "silence", "salons", "stats", "test", "envoyer", "aideadmin"]
 
@@ -2803,6 +2803,26 @@ async def silence(
 
 
 # =====================================================================
+# /lien : dépôt GitHub du bot
+# =====================================================================
+GITHUB_URL = "https://github.com/MrMisteur/Bot-IA-Discord-Brabus"
+
+
+@bot.tree.command(name="lien", description="Le lien GitHub du code de Brabus")
+async def lien(interaction: discord.Interaction):
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(label="Voir sur GitHub", url=GITHUB_URL, emoji="🐙"))
+    await interaction.response.send_message(
+        embed=make_embed(
+            "Le code du Tonton",
+            f"Tout le code de Brabus est ici, ti moun :\n{GITHUB_URL}",
+            MER, "🔗",
+        ),
+        view=view,
+    )
+
+
+# =====================================================================
 # /ping, /envoyer, /aideadmin
 # =====================================================================
 START_TIME = time.time()
@@ -2934,7 +2954,7 @@ async def aideadmin(interaction: discord.Interaction):
 EXPECTED_COMMANDS = {
     "ask", "resume", "traduis", "conseil", "roast_image", "goulag", "coup_de_ceinture",
     "tribunal", "clash", "ki-moun", "sondage-chaos", "imposteur", "exorcisme", "adoption", "shatta", "style", "aide", "reset", "stats", "test", "ping", "envoyer", "aideadmin",
-    "annuler", "silence", "salons",
+    "annuler", "silence", "salons", "lien",
 }
 
 
