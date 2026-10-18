@@ -1673,8 +1673,12 @@ async def _run_clash(
         "Brabus délibère pendant ce temps… 🧓",
         MADRAS, "🗳️",
     )
-    vote_msg = await channel.send(embed=vote_embed, view=vote)
-    await vote.wait()
+    try:
+        vote_msg = await channel.send(embed=vote_embed, view=vote)
+        await vote.wait()
+    except asyncio.CancelledError:   # /annuler : on ne laisse pas le juge tourner dans le vide
+        judge.cancel()
+        raise
     vote.disable()
     try:
         await vote_msg.edit(view=vote)
