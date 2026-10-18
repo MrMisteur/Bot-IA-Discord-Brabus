@@ -1,1 +1,34 @@
+# --- Obligatoire ---
+DISCORD_TOKEN=
+GROQ_API_KEY=
 
+# --- Optionnel ---
+# Modèles Groq : un ou plusieurs noms séparés par des virgules (le bot prend le premier qui existe).
+# Les modèles Groq sont retirés régulièrement : vérifie console.groq.com/docs/models
+GROQ_MODEL=openai/gpt-oss-120b,openai/gpt-oss-20b
+# Modèles utilisés quand un message contient une image (doivent gérer la vision)
+GROQ_VISION_MODEL=qwen/qwen3.8-27b,qwen/qwen3.6-27b
+# ID d'un serveur de test : les commandes y apparaissent instantanément (sinon sync globale, plus lente)
+DEV_GUILD_ID=
+# Mettre 1 pour forcer la resynchronisation des commandes au démarrage
+SYNC_ON_START=0
+# Pseudo du bot sur les serveurs ("" = ne rien changer)
+BOT_NICK=Brabus
+# 1 = répond aussi quand on écrit "Brabus" dans un message
+NAME_TRIGGER=1
+# 1 = répond aux simples « Bonjour / Salut / Coucou » sans qu'on le mentionne (sans appel API)
+AUTO_GREET=1
+# Secondes avant de re-saluer la même personne
+GREET_COOLDOWN_SECONDS=30
+# Anti-spam (secondes entre deux demandes d'une même personne)
+COOLDOWN_SECONDS=4
+# Chance (0 à 1) que Brabus réagisse avec un emoji à un message, 0 = jamais
+DARON_REACT_CHANCE=0.02
+# Durée du vote de /clash (secondes)
+CLASH_VOTE_SECONDS=40
+# Durée du vote de /tribunal (secondes)
+TRIBUNAL_VOTE_SECONDS=45
+# Chemin de la base SQLite (par défaut : daron.db à côté de bot.py)
+DARON_DB=
+# Remplace entièrement la personnalité de Brabus (laisser vide pour garder celle du code)
+SYSTEM_PROMPT=
