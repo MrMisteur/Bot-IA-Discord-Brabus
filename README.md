@@ -1,6 +1,6 @@
 # 🌴 Brabus — Bot Discord IA
 
-Bot Discord en français, personnalité « tonton antillais grande gueule et attachant » aux couleurs de la Guadeloupe et de la Martinique. Il discute par mention, réponse ou prénom, chambre, juge, anime des jeux, sort du shatta en direct et garde la mémoire de chaque salon. Tout tient dans un seul fichier : `bot.py`.
+Bot Discord en français, personnalité « tonton antillais grande gueule et attachant » aux couleurs de la Guadeloupe et de la Martinique. Il discute par mention, réponse ou prénom, chambre, juge, anime des jeux avec classements, sort du shatta en direct et garde la mémoire de chaque salon. Tout tient dans un seul fichier : `bot.py`.
 
 ## Sommaire
 
@@ -10,6 +10,7 @@ Bot Discord en français, personnalité « tonton antillais grande gueule et att
 - [Configuration (`.env`)](#configuration-env)
 - [Permissions et intents Discord](#permissions-et-intents-discord)
 - [Commandes](#commandes)
+- [Classements](#classements)
 - [Données et sauvegarde](#données-et-sauvegarde)
 - [Dépannage](#dépannage)
 - [Crédits](#crédits)
@@ -19,8 +20,10 @@ Bot Discord en français, personnalité « tonton antillais grande gueule et att
 - **Chat IA** : répond aux mentions, aux réponses à ses messages, quand on écrit « Brabus » et en MP ; réponse affichée en direct pendant la génération ; mémoire par salon (SQLite) ; il regarde les images jointes.
 - **Spontané** : répond aux simples « Bonjour » sans appel à l'IA et pose de petites réactions emoji aléatoires.
 - **Personnalité réglable** : style, dialecte (Guadeloupe ou Martinique) et intensité des piques, par serveur.
-- **Pour rire** : goulag avec casier et corvées, coup de ceinture, tribunal, clash de punchlines, exorcisme, adoption.
-- **Jeux** : ki-moun (devine le personnage), imposteur (bluff avec mots secrets), sondage-chaos, tous annulables avec `/annuler`.
+- **Pour rire** : clash de punchlines, coup de ceinture, adoption et arbre de famille.
+- **Jeux** : ki-moun, imposteur, sondage-chaos, histoire absurde, mafia, bomb-textuel, petit-bac, pendu-menteur, chasse-au-mot, tous annulables avec `/annuler`.
+- **Règles intégrées** : `/regle` explique les règles de chaque jeu, au choix dans une liste.
+- **Classements par jeu** : chaque victoire est comptée par serveur, `/profil-tonton` affiche ton rang dans chaque jeu.
 - **Musique** : du shatta trouvé en direct sur Deezer.
 - **Mode silence** : le bot arrête les réactions et réponses spontanées quand tu veux du calme.
 - **Salons interdits** : salons, forums ou catégories où Brabus se tait complètement.
@@ -92,16 +95,28 @@ Au premier démarrage, les commandes slash se synchronisent automatiquement. Ell
 | `NAME_TRIGGER` | `1` | `1` : répond aussi quand on écrit « Brabus » ; `0` : désactivé |
 | `AUTO_GREET` | `1` | `1` : répond aux « Bonjour » sans mention ; `0` : désactivé |
 | `GREET_COOLDOWN_SECONDS` | `30` | Délai entre deux salutations à la même personne |
+| `GAME_LOBBY_SECONDS` | `60` | Durée de la salle d'attente des jeux de groupe |
 | `CLASH_ROUNDS` | `3` | Punchlines par combattant |
 | `CLASH_TURN_SECONDS` | `60` | Temps par tour de clash |
 | `CLASH_VOTE_SECONDS` | `45` | Durée du vote du clash |
-| `TRIBUNAL_VOTE_SECONDS` | `45` | Durée du vote du tribunal |
-| `GOULAG_VOTE_SECONDS` | `30` | Durée du vote du goulag |
+| `CEINTURE_SECONDS` | `8` | Temps pour esquiver le coup de ceinture |
 | `KIMOUN_CLUE_SECONDS` | `20` | Délai entre deux indices de ki-moun |
 | `CHAOS_VOTE_SECONDS` | `40` | Durée du sondage-chaos |
 | `IMPOSTEUR_LOBBY_SECONDS` | `60` | Durée du lobby d'imposteur |
 | `IMPOSTEUR_VOTE_SECONDS` | `45` | Durée du vote d'imposteur |
-| `ADOPTION_SECONDS` | `40` | Durée de l'adoption |
+| `ADOPTION_SECONDS` | `40` | Durée de l'appel à candidatures de l'adoption |
+| `ADOPTION_CHOICE_SECONDS` | `40` | Temps pour choisir parmi les candidats |
+| `ADOPTION_ROLE_SECONDS` | `45` | Temps pour choisir son rôle dans la famille |
+| `HISTOIRE_WRITE_SECONDS` | `90` | Temps pour écrire ses phrases (histoire) |
+| `MAFIA_NIGHT_SECONDS` | `45` | Durée de la nuit (mafia) |
+| `MAFIA_DEBATE_SECONDS` | `75` | Durée du débat de jour (mafia) |
+| `MAFIA_VOTE_SECONDS` | `40` | Durée du vote de jour (mafia) |
+| `BOMB_LIVES` | `2` | Vies par joueur (bomb-textuel) |
+| `BOMB_SECONDS` | `15` | Durée de la mèche au départ (bomb-textuel) |
+| `PETITBAC_SECONDS` | `90` | Durée d'une manche de petit-bac |
+| `PENDU_QUESTIONS` | `12` | Nombre de questions max (pendu-menteur) |
+| `PENDU_SECONDS` | `300` | Durée max d'une partie de pendu-menteur |
+| `CHASSE_CLUE_SECONDS` | `20` | Délai entre deux indices de chasse-au-mot |
 | `DEV_GUILD_ID` | *(vide)* | Synchronise les commandes instantanément sur un serveur de test |
 | `SYNC_ON_START` | *(vide)* | `1` : force la resynchronisation des commandes à chaque démarrage |
 
@@ -134,37 +149,44 @@ Les commandes marquées *(modo)* ou *(admin)* sont réservées. `/aide` affiche 
 
 | Commande | Description |
 | --- | --- |
-| `/ask` | Pose une question au Tonton |
-| `/resume` | Résume les derniers messages du salon |
-| `/traduis` | Traduit un texte (avec l'accent du Tonton) |
+| `/ask <question>` | Pose une question au Tonton |
+| `/resume [nombre]` | Résume les derniers messages du salon |
+| `/traduis <texte> [langue]` | Traduit un texte (avec l'accent du Tonton) |
 | `/conseil [sujet]` | Un conseil de vie bourru |
-| `/roast_image` | Le Tonton juge ta photo (chambre, bureau, plat…) |
+| `/roast_image <image> [précision]` | Le Tonton juge ta photo (chambre, bureau, plat…) |
 
 ### 🎭 Pour rire
 
 | Commande | Description |
 | --- | --- |
-| `/goulag <membre> [motif]` | Casier, corvées et vote (pour rire) |
-| `/coup_de_ceinture` | Menace 100 % théâtrale |
-| `/tribunal <membre> [affaire]` | Brabus juge quelqu'un, le salon vote |
-| `/clash <membre> [thème]` | Un vrai clash de punchlines écrit dans le salon, jugé par Brabus |
-| `/exorcisme` | Chasse le démon du mauvais gameplay |
+| `/clash <membre> [thème]` | Un vrai clash de punchlines écrit dans le salon, jugé par le public puis par Brabus |
+| `/clash-classement` | Le classement des clasheurs du serveur : victoires et défaites |
+| `/coup_de_ceinture <membre> [motif]` | Menace 100 % théâtrale, la cible peut esquiver |
 | `/adoption <membre> [détail]` | Cherche une famille virtuelle à un membre « abandonné » |
+| `/famille [membre]` | L'arbre de famille d'un membre : parents, frères et sœurs, cousins… |
+| `/profil-tonton [membre]` | Tes victoires et ton rang dans chaque jeu |
 
 ### 🎲 Jeux
 
-| Commande | Description |
-| --- | --- |
-| `/ki-moun [catégorie]` | Devine le personnage grâce aux indices, plus tu trouves tôt, plus tu gagnes de points |
-| `/imposteur [thème]` | Jeu de bluff : chacun reçoit un mot en privé, l'un d'eux a un mot différent |
-| `/sondage-chaos` | Sondage absurde entre membres |
-| `/annuler` | Annule le jeu en cours dans le salon (celui qui l'a lancé ou un modérateur) |
+| Commande | Joueurs | Description |
+| --- | --- | --- |
+| `/ki-moun [catégorie]` | tous | Devine le personnage grâce aux indices, plus tu trouves tôt, plus tu gagnes de points |
+| `/imposteur [thème]` | 3 à 8 | Jeu de bluff : chacun reçoit un mot en privé, l'un d'eux a un mot différent |
+| `/sondage-chaos [question] [membres…]` | tous | Sondage absurde entre membres |
+| `/histoire [phrases]` | 2 à 10 | Chacun écrit en secret, Brabus assemble une histoire absurde |
+| `/mafia` | 4 à 12 | Rôles secrets (tueur, détective, médecin), débat le jour, pouvoirs la nuit |
+| `/bomb-textuel` | 2 à 10 | Trouve un mot avec la syllabe avant que la bombe n'explose, sinon tu perds une vie |
+| `/petit-bac [manches]` | 2 à 10 | Une lettre, des catégories, le plus rapide crie « Petit Bac ! » pour stopper |
+| `/pendu-menteur [catégorie]` | tous | Questions oui/non sur un personnage mystère… mais Brabus ment une fois |
+| `/chasse-au-mot [manches]` | tous | Brabus décrit un objet de façon absurde, le premier qui trouve le mot gagne |
+| `/regle <jeu>` | | Choisis un jeu : Brabus t'explique ses règles |
+| `/annuler` | | Annule le jeu en cours dans le salon (celui qui l'a lancé ou un modérateur) |
 
 ### 🎶 Musique
 
 | Commande | Description |
 | --- | --- |
-| `/shatta` | Du shatta trouvé en direct sur Deezer |
+| `/shatta [nombre] [recherche]` | Du shatta trouvé en direct sur Deezer |
 
 ### 🔇 Calme et salons
 
@@ -178,8 +200,8 @@ Les commandes marquées *(modo)* ou *(admin)* sont réservées. `/aide` affiche 
 
 | Commande | Description |
 | --- | --- |
-| `/style` *(admin)* | Règle le style, le dialecte (Guadeloupe ou Martinique) et l'intensité des piques. Sans option : affiche les réglages |
-| `/envoyer` *(admin)* | Fait parler Brabus dans un salon au choix, avec réponse possible à un message |
+| `/style [style] [dialecte] [intensité]` *(admin)* | Règle le style, le dialecte (Guadeloupe ou Martinique) et l'intensité des piques. Sans option : affiche les réglages |
+| `/envoyer <message> [salon] [répondre_à]` *(admin)* | Fait parler Brabus dans un salon au choix, avec réponse possible à un message |
 | `/stats` *(admin)* | Appels API du jour, membres les plus bavards, modèles en service |
 | `/test` *(admin)* | Auto-diagnostic : base, Groq (texte, flux, JSON, vision), Deezer, permissions, commandes |
 | `/aideadmin` *(admin)* | Guide des commandes et réglages réservés aux admins |
@@ -187,11 +209,27 @@ Les commandes marquées *(modo)* ou *(admin)* sont réservées. `/aide` affiche 
 | `/lien` | Lien GitHub du projet |
 | `/ping` | Latence du bot |
 
-> `/silence` demande la permission « Gérer les messages », `/salons`, `/style`, `/stats`, `/envoyer` et `/test` celle d'administrateur.
+> `/silence` et `/reset` demandent la permission « Gérer les messages », `/salons`, `/style`, `/stats`, `/envoyer` et `/test` celle d'administrateur.
+
+## Classements
+
+Chaque victoire est enregistrée **par serveur et par jeu** : clash, ki-moun, imposteur, mafia, bomb-textuel, petit-bac, pendu-menteur et chasse-au-mot. `/histoire` et `/sondage-chaos` n'ont pas de gagnant, donc pas de classement.
+
+| Jeu | Qui gagne ? |
+| --- | --- |
+| Clash | Le vainqueur du vote (public, puis Brabus) |
+| Ki-moun, chasse-au-mot | Le plus rapide à trouver (chasse-au-mot : meilleur score sur les manches) |
+| Imposteur | L'équipe si l'imposteur est démasqué, sinon l'imposteur |
+| Mafia | Le camp vainqueur (village ou tueurs) |
+| Bomb-textuel | Le dernier en vie |
+| Petit-bac | Le meilleur score cumulé |
+| Pendu-menteur | Celui qui trouve le personnage |
+
+`/profil-tonton` affiche tes victoires et ton rang sur le serveur (🥇🥈🥉 puis n°4, n°5…) dans chaque jeu, avec un total, ton nombre de podiums et un titre (« Champion · Mafia » si tu es premier quelque part). Seules les parties jouées après l'ajout des classements sont comptées, sauf le clash qui garde son historique.
 
 ## Données et sauvegarde
 
-Tout est stocké dans un fichier SQLite (`daron.db` par défaut, modifiable via `DARON_DB`) : mémoire des salons, compteurs d'appels pour `/stats`, casier du goulag, réglages par serveur, salons interdits et mode silence. Les tables sont créées automatiquement, y compris sur une base existante : une mise à jour ne supprime rien.
+Tout est stocké dans un fichier SQLite (`daron.db` par défaut, modifiable via `DARON_DB`) : mémoire des salons, compteurs d'appels pour `/stats`, familles de `/adoption`, coups de ceinture, victoires et classements des jeux, réglages par serveur, salons interdits et mode silence. Les tables sont créées automatiquement, y compris sur une base existante : une mise à jour ne supprime rien (les anciennes tables inutilisées, comme celles du goulag, restent simplement là sans gêner).
 
 Pour sauvegarder : arrête le bot et copie `daron.db` (ainsi que les éventuels fichiers `daron.db-wal` et `daron.db-shm`). Si ton hébergeur efface les fichiers à chaque redémarrage, place la base sur un volume persistant.
 
@@ -200,11 +238,13 @@ Pour sauvegarder : arrête le bot et copie `daron.db` (ainsi que les éventuels 
 - **Le bot ne répond pas aux messages** : vérifie que le *Message Content Intent* est activé dans le Developer Portal.
 - **Il ne démarre pas** : `DISCORD_TOKEN` et `GROQ_API_KEY` doivent être définis dans `.env`.
 - **Les commandes n'apparaissent pas** : redémarre le bot avec `SYNC_ON_START=1` une fois, ou renseigne `DEV_GUILD_ID` pour une synchronisation instantanée sur ton serveur de test. En synchronisation globale, la propagation côté Discord peut prendre quelques minutes.
+- **Une commande supprimée apparaît encore** : même remède, la synchronisation des commandes n'est peut-être pas encore passée.
 - **Erreur « modèle introuvable »** : les modèles Groq changent souvent, mets à jour `GROQ_MODEL` (ou `GROQ_VISION_MODEL` pour les images).
 - **« Brabus est essoufflé »** : la limite de débit de Groq est atteinte, attends une minute.
 - **`/roast_image` ou la lecture d'images échoue** : vérifie `GROQ_VISION_MODEL` et que l'image fait moins de 3 Mo (jpeg, png, gif ou webp, 3 images maximum).
-- **Il ne répond plus dans un salon** : regarde `/salons liste` (salon ou catégorie interdits) et `/silence État` (mode silence actif).
+- **Il ne répond plus dans un salon** : regarde `/salons liste` (salon ou catégorie interdits) et `/silence` (mode silence actif).
 - **« Un jeu est déjà en cours »** : lance `/annuler` dans le salon, ou attends la fin du jeu.
+- **Je ne comprends pas un jeu** : `/regle` affiche ses règles à tout moment.
 - **`/shatta` ne trouve rien** : Deezer peut être momentanément indisponible, réessaie plus tard ; `/test` indique l'état du service.
 - **Le pseudo « Brabus » ne s'applique pas** : donne-lui la permission « Modifier son pseudo », ou mets `BOT_NICK=` vide pour ne rien changer.
 - **Un doute sur l'installation** : lance `/test`, il repère en quelques secondes ce qui ne va pas.
